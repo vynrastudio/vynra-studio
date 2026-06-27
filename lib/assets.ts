@@ -189,17 +189,72 @@ export function getPortfolioItems(): PortfolioItem[] {
     });
 }
 
-/** Returns the first image found in a folder under the asset root, or null. */
-function firstImageIn(folder: string): string | null {
+/** Returns the absolute path of the first image in a folder, or null. */
+function firstImageAbs(folder: string): string | null {
   const dir = path.join(ASSET_ROOT, folder);
-  const img = walk(dir).find((f) =>
-    IMAGE_EXT.has(path.extname(f).toLowerCase())
+  return (
+    walk(dir).find((f) => IMAGE_EXT.has(path.extname(f).toLowerCase())) ?? null
   );
-  return img ? toPublicPath(img) : null;
 }
 
-export function getLogo(): string | null {
-  return firstImageIn("logo");
+/** Returns the first image found in a folder under the asset root, or null. */
+function firstImageIn(folder: string): string | null {
+  const abs = firstImageAbs(folder);
+  return abs ? toPublicPath(abs) : null;
+}
+
+/** Reads intrinsic pixel dimensions from PNG / WebP / JPEG headers. */
+function readImageSize(file: string): { width: number; height: number } | null {
+  try {
+    const fd = fs.openSync(file, "r");
+    const buf = Buffer.alloc(64);
+    fs.readSync(fd, buf, 0, 64, 0);
+    fs.closeSync(fd);
+    const ext = path.extname(file).toLowerCase();
+
+    if (ext === ".png") {
+      return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+    }
+    if (ext === ".webp" && buf.toString("ascii", 0, 4) === "RIFF") {
+      const fourcc = buf.toString("ascii", 12, 16);
+      if (fourcc === "VP8 ") {
+        return {
+          width: buf.readUInt16LE(26) & 0x3fff,
+          height: buf.readUInt16LE(28) & 0x3fff,
+        };
+      }
+      if (fourcc === "VP8X") {
+        const w = 1 + (buf[24] | (buf[25] << 8) | (buf[26] << 16));
+        const h = 1 + (buf[27] | (buf[28] << 8) | (buf[29] << 16));
+        return { width: w, height: h };
+      }
+      if (fourcc === "VP8L") {
+        const b1 = buf[22];
+        const b2 = buf[23];
+        const b3 = buf[24];
+        return {
+          width: 1 + (((b2 & 0x3f) << 8) | buf[21]),
+          height: 1 + (((b3 & 0x0f) << 10) | (b2 >> 6) | (b1 << 2)),
+        };
+      }
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export interface LogoAsset {
+  src: string;
+  width: number;
+  height: number;
+}
+
+export function getLogo(): LogoAsset | null {
+  const abs = firstImageAbs("logo");
+  if (!abs) return null;
+  const dims = readImageSize(abs) ?? { width: 320, height: 210 };
+  return { src: toPublicPath(abs), width: dims.width, height: dims.height };
 }
 
 export function getFounderPhoto(): string | null {

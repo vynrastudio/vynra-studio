@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { site } from "@/lib/site";
 import Reveal from "./Reveal";
 import CloudOverlay from "./CloudOverlay";
@@ -34,11 +35,12 @@ export default function Founder({ photo }: { photo: string | null }) {
             <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-bg p-1.5 ring-1 ring-white/60 shadow-float">
               <div className="relative h-full w-full overflow-hidden rounded-[1.4rem] ring-1 ring-black/5">
                 {photo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={photo}
                     alt={`${founder.name}, ${founder.title}`}
-                    className="absolute inset-0 h-full w-full object-cover"
+                    fill
+                    sizes="(max-width: 480px) 88vw, 384px"
+                    className="object-cover"
                     style={{ objectPosition: "50% 26%", transform: "scale(1.08)" }}
                   />
                 ) : (

@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { site } from "@/lib/site";
+import type { LogoAsset } from "@/lib/assets";
 
-export default function Footer({ logo }: { logo: string | null }) {
+export default function Footer({ logo }: { logo: LogoAsset | null }) {
   const year = 2026;
   return (
     <footer className="border-t border-line bg-bg">
@@ -12,10 +14,12 @@ export default function Footer({ logo }: { logo: string | null }) {
           <div>
             <div className="flex items-center gap-2.5">
               {logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={logo}
+                <Image
+                  src={logo.src}
                   alt={`${site.name} logo`}
+                  width={logo.width}
+                  height={logo.height}
+                  sizes="56px"
                   className="h-8 w-auto object-contain"
                 />
               ) : (

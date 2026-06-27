@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { site } from "@/lib/site";
+import type { LogoAsset } from "@/lib/assets";
 
 const LINKS = [
   { label: "Work", target: "#work" },
@@ -19,7 +21,7 @@ function scrollTo(target: string) {
   el?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-export default function Navbar({ logo }: { logo: string | null }) {
+export default function Navbar({ logo }: { logo: LogoAsset | null }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -57,10 +59,13 @@ export default function Navbar({ logo }: { logo: string | null }) {
           >
             <span className="flex items-center gap-2">
               {logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={logo}
+                <Image
+                  src={logo.src}
                   alt={`${site.name} logo`}
+                  width={logo.width}
+                  height={logo.height}
+                  priority
+                  sizes="48px"
                   className="h-7 w-auto object-contain"
                 />
               ) : (

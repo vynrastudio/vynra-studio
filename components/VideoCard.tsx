@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import type { PortfolioItem } from "@/lib/assets";
 
 interface VideoCardProps {
@@ -19,6 +20,10 @@ const GRADIENTS = [
   "linear-gradient(135deg,#eaeef2 0%,#d9e2ec 100%)",
 ];
 
+// Card width across breakpoints (72vw → 42vw → 300px → 320px).
+const POSTER_SIZES =
+  "(max-width: 640px) 72vw, (max-width: 768px) 42vw, (max-width: 1024px) 300px, 320px";
+
 export default function VideoCard({
   item,
   index,
@@ -28,12 +33,14 @@ export default function VideoCard({
   onOpen,
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
 
   const handleEnter = () => {
     onHover(item.id);
     const v = videoRef.current;
     if (v) {
       v.currentTime = 0;
+      // preload="none" — play() triggers the load only now (on hover).
       v.play().catch(() => {});
     }
   };
@@ -42,6 +49,7 @@ export default function VideoCard({
     onHover(null);
     const v = videoRef.current;
     if (v) v.pause();
+    setPlaying(false);
   };
 
   return (
@@ -66,16 +74,32 @@ export default function VideoCard({
         }`}
       >
         {item.src ? (
-          <video
-            ref={videoRef}
-            src={item.src}
-            poster={item.poster ?? undefined}
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 h-full w-full scale-[1.03] object-cover transition-transform duration-[1.4s] ease-cinematic group-hover:scale-[1.09]"
-          />
+          // cinematic zoom wrapper (positioned, so next/image `fill` works)
+          <div className="absolute inset-0 scale-[1.03] transition-transform duration-[1.4s] ease-cinematic group-hover:scale-[1.09]">
+            {item.poster ? (
+              <Image
+                src={item.poster}
+                alt={item.title}
+                fill
+                sizes={POSTER_SIZES}
+                className="object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[#0c0c0e]" />
+            )}
+            <video
+              ref={videoRef}
+              src={item.src}
+              muted
+              loop
+              playsInline
+              preload="none"
+              onPlaying={() => setPlaying(true)}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+                playing ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          </div>
         ) : (
           // Elegant placeholder when no video is uploaded yet.
           <div
