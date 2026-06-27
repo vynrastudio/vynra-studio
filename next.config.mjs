@@ -5,6 +5,8 @@ const nextConfig = {
   images: {
     // Serve AVIF/WebP variants from the optimizer where supported.
     formats: ["image/avif", "image/webp"],
+    // 75 = default for most images; 95 = near-lossless founder portrait.
+    qualities: [75, 95],
   },
 };
 

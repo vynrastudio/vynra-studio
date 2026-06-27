@@ -39,6 +39,7 @@ export default function Founder({ photo }: { photo: string | null }) {
                     src={photo}
                     alt={`${founder.name}, ${founder.title}`}
                     fill
+                    quality={95}
                     sizes="(max-width: 480px) 88vw, 384px"
                     className="object-cover"
                     style={{ objectPosition: "50% 26%", transform: "scale(1.08)" }}
