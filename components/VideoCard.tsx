@@ -10,7 +10,6 @@ interface VideoCardProps {
   hovered: boolean;
   dimmed: boolean;
   onHover: (id: string | null) => void;
-  onOpen: (item: PortfolioItem) => void;
 }
 
 const GRADIENTS = [
@@ -30,43 +29,86 @@ export default function VideoCard({
   hovered,
   dimmed,
   onHover,
-  onOpen,
 }: VideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
+  const [active, setActive] = useState(false); // user clicked → inline playback engaged
+  const [started, setStarted] = useState(false); // video has produced frames
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
 
+  // Hover preview — only when the card isn't engaged by a click.
   const handleEnter = () => {
     onHover(item.id);
+    if (active) return;
     const v = videoRef.current;
     if (v) {
+      v.muted = true;
       v.currentTime = 0;
-      // preload="none" — play() triggers the load only now (on hover).
       v.play().catch(() => {});
     }
   };
 
   const handleLeave = () => {
     onHover(null);
+    if (active) return; // engaged video keeps playing inline
     const v = videoRef.current;
-    if (v) v.pause();
-    setPlaying(false);
+    if (v) {
+      v.pause();
+      v.currentTime = 0;
+    }
+    setStarted(false);
+  };
+
+  // Click → play the video inline, inside this same card. Play/pause toggle.
+  const handleClick = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (!active) {
+      setActive(true);
+      v.muted = muted;
+      if (v.paused) v.play().catch(() => {});
+      return;
+    }
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  };
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleClick();
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const v = videoRef.current;
+    const next = !muted;
+    setMuted(next);
+    if (v) v.muted = next;
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       data-cursor="play"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       onFocus={handleEnter}
       onBlur={handleLeave}
-      onClick={() => onOpen(item)}
-      className="group relative block w-full text-left transition-[opacity,transform] duration-500 ease-cinematic"
+      onClick={handleClick}
+      onKeyDown={handleKey}
+      className="group relative block w-full cursor-pointer text-left outline-none transition-[opacity,transform] duration-500 ease-cinematic focus-visible:ring-2 focus-visible:ring-accent/50"
       style={{
         opacity: dimmed ? 0.5 : 1,
         transform: hovered ? "translateY(-6px)" : "translateY(0)",
       }}
-      aria-label={`Play ${item.title}`}
+      aria-label={
+        active
+          ? `${isPlaying ? "Pause" : "Play"} ${item.title}`
+          : `Play ${item.title}`
+      }
     >
       <div
         className={`film-grain relative aspect-[9/13] w-full overflow-hidden rounded-[22px] bg-[#0c0c0e] transition-all duration-500 ease-cinematic ${
@@ -94,9 +136,11 @@ export default function VideoCard({
               loop
               playsInline
               preload="none"
-              onPlaying={() => setPlaying(true)}
+              onPlaying={() => setStarted(true)}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-                playing ? "opacity-100" : "opacity-0"
+                started ? "opacity-100" : "opacity-0"
               }`}
             />
           </div>
@@ -139,19 +183,55 @@ export default function VideoCard({
           {String(index + 1).padStart(2, "0")}
         </div>
 
-        {/* play affordance, refined */}
-        <div
-          className={`absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full bg-white/12 text-white ring-1 ring-white/25 backdrop-blur-md transition-all duration-500 ${
-            hovered ? "scale-100 opacity-100" : "scale-90 opacity-0"
-          }`}
-        >
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
-            <path d="M4 2.5v11l9-5.5-9-5.5Z" fill="currentColor" />
-          </svg>
-        </div>
+        {/* play / pause indicator (visual; clicking the card toggles) */}
+        {item.src && (
+          <div
+            aria-hidden
+            className={`absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full bg-white/12 text-white ring-1 ring-white/25 backdrop-blur-md transition-all duration-500 ${
+              hovered || active
+                ? "scale-100 opacity-100"
+                : "scale-90 opacity-0"
+            }`}
+          >
+            {active && isPlaying ? (
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor">
+                <rect x="3" y="2.5" width="3.5" height="11" rx="1" />
+                <rect x="9.5" y="2.5" width="3.5" height="11" rx="1" />
+              </svg>
+            ) : (
+              <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+                <path d="M4 2.5v11l9-5.5-9-5.5Z" fill="currentColor" />
+              </svg>
+            )}
+          </div>
+        )}
+
+        {/* mute / unmute — appears once inline playback is engaged */}
+        {item.src && active && (
+          <button
+            type="button"
+            onClick={toggleMute}
+            aria-label={muted ? "Unmute" : "Mute"}
+            className="absolute bottom-3.5 right-3.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/12 text-white ring-1 ring-white/25 backdrop-blur-md transition-colors duration-300 hover:bg-white/25"
+          >
+            {muted ? (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                <line x1="22" y1="9" x2="16" y2="15" />
+                <line x1="16" y1="9" x2="22" y2="15" />
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                <path d="M18.5 6a9 9 0 0 1 0 12" />
+              </svg>
+            )}
+          </button>
+        )}
 
         {/* caption */}
-        <div className="absolute inset-x-0 bottom-0 p-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 pr-14">
           <span
             className={`text-[10.5px] font-semibold uppercase tracking-[0.2em] transition-colors duration-500 ${
               hovered ? "text-accent-2" : "text-white/60"
@@ -177,6 +257,6 @@ export default function VideoCard({
           }`}
         />
       </div>
-    </button>
+    </div>
   );
 }

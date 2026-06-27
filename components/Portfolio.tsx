@@ -6,7 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { PortfolioItem } from "@/lib/assets";
 import { CATEGORIES } from "@/lib/site";
 import VideoCard from "./VideoCard";
-import PortfolioModal from "./PortfolioModal";
 import Reveal from "./Reveal";
 
 type Filter = "All" | (typeof CATEGORIES)[number];
@@ -14,7 +13,6 @@ type Filter = "All" | (typeof CATEGORIES)[number];
 export default function Portfolio({ items }: { items: PortfolioItem[] }) {
   const [active, setActive] = useState<Filter>("All");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [openItem, setOpenItem] = useState<PortfolioItem | null>(null);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
@@ -153,7 +151,6 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
                 hovered={hoveredId === item.id}
                 dimmed={hoveredId !== null && hoveredId !== item.id}
                 onHover={setHoveredId}
-                onOpen={setOpenItem}
               />
             </div>
           ))}
@@ -168,8 +165,6 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
           </p>
         )}
       </div>
-
-      <PortfolioModal item={openItem} onClose={() => setOpenItem(null)} />
     </section>
   );
 }

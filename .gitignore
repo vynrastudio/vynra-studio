@@ -31,3 +31,4 @@ next-env.d.ts
 
 # original (pre-optimization) assets — not deployed
 /_asset-originals
+.vercel
