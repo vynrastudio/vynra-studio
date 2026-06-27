@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { site } from "@/lib/site";
 import Reveal from "./Reveal";
 import CloudOverlay from "./CloudOverlay";
+import Magnetic from "./Magnetic";
 
 declare global {
   interface Window {
@@ -112,20 +113,22 @@ export default function Booking() {
                 your footage, and how we can help you stand out.
               </p>
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <button
-                  onClick={openModal}
-                  data-cursor="link"
-                  className="w-full rounded-full bg-white px-7 py-3.5 text-[15px] font-medium text-ink transition-transform duration-300 ease-cinematic hover:-translate-y-0.5 sm:w-auto"
-                >
-                  Book a Call
-                </button>
-                <a
-                  href={`mailto:${site.contact.email}`}
-                  data-cursor="link"
-                  className="w-full rounded-full border border-white/25 px-7 py-3.5 text-[15px] font-medium text-white transition-colors duration-300 hover:bg-white/10 sm:w-auto"
-                >
-                  Email us
-                </a>
+                <Magnetic className="w-full sm:w-auto">
+                  <button
+                    onClick={openModal}
+                    className="w-full rounded-full bg-white px-7 py-3.5 text-[15px] font-medium text-ink transition-colors duration-300 ease-cinematic hover:bg-white/90 sm:w-auto"
+                  >
+                    Book a Call
+                  </button>
+                </Magnetic>
+                <Magnetic className="w-full sm:w-auto">
+                  <a
+                    href={`mailto:${site.contact.email}`}
+                    className="block w-full rounded-full border border-white/25 px-7 py-3.5 text-center text-[15px] font-medium text-white transition-colors duration-300 hover:bg-white/10 sm:w-auto"
+                  >
+                    Email us
+                  </a>
+                </Magnetic>
               </div>
             </div>
           </div>

@@ -3,111 +3,84 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Magnetic cinematic cursor.
- * - Hidden system cursor on fine-pointer devices (see globals.css).
- * - A tiny #111 dot that smoothly trails the pointer.
- * - Over [data-cursor="play"] targets it expands into a translucent,
- *   backdrop-blurred circle with the word "PLAY" inside.
+ * Subtle premium cursor glow.
+ *
+ * The system cursor stays fully visible and everything remains readable and
+ * clickable. This only adds a small, soft blue light that trails the pointer —
+ * rendered with `mix-blend-mode: multiply` so it gently tints the light
+ * background around the cursor while leaving text crisp and never blurred.
+ * Grows a touch over interactive elements as a quiet affordance.
  */
 export default function Cursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [enabled, setEnabled] = useState(false);
-  const [label, setLabel] = useState<string | null>(null);
-  const [active, setActive] = useState(false);
 
   useEffect(() => {
     const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (!fine.matches) return;
     setEnabled(true);
 
-    const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-    const ring = { x: mouse.x, y: mouse.y };
+    const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    const cur = { ...pos };
+    let scale = 1;
+    let targetScale = 1;
+    let opacity = 0;
+    let targetOpacity = 0;
     let raf = 0;
 
     const onMove = (e: MouseEvent) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      if (dotRef.current) {
-        dotRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`;
-      }
-      const target = (e.target as HTMLElement)?.closest?.(
-        "[data-cursor]"
-      ) as HTMLElement | null;
-      if (target) {
-        setActive(true);
-        setLabel(target.dataset.cursor === "play" ? "PLAY" : "");
-      } else {
-        setActive(false);
-        setLabel(null);
-      }
+      pos.x = e.clientX;
+      pos.y = e.clientY;
+      targetOpacity = 1;
+      const interactive = (e.target as HTMLElement)?.closest?.(
+        "a, button, [role='button'], [data-cursor]"
+      );
+      targetScale = interactive ? 1.9 : 1;
+    };
+    const onLeave = () => {
+      targetOpacity = 0;
     };
 
     const render = () => {
-      ring.x += (mouse.x - ring.x) * 0.16;
-      ring.y += (mouse.y - ring.y) * 0.16;
-      if (ringRef.current) {
-        ringRef.current.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0)`;
+      // gentle trailing ease (or snap when reduced motion)
+      const k = reduce.matches ? 1 : 0.2;
+      cur.x += (pos.x - cur.x) * k;
+      cur.y += (pos.y - cur.y) * k;
+      scale += (targetScale - scale) * 0.15;
+      opacity += (targetOpacity - opacity) * 0.12;
+      const el = ref.current;
+      if (el) {
+        el.style.transform = `translate3d(${cur.x}px, ${cur.y}px, 0) translate(-50%, -50%) scale(${scale})`;
+        el.style.opacity = String(opacity);
       }
       raf = requestAnimationFrame(render);
     };
     raf = requestAnimationFrame(render);
 
-    const onLeave = () => {
-      if (dotRef.current) dotRef.current.style.opacity = "0";
-      if (ringRef.current) ringRef.current.style.opacity = "0";
-    };
-    const onEnter = () => {
-      if (dotRef.current) dotRef.current.style.opacity = "1";
-      if (ringRef.current) ringRef.current.style.opacity = "1";
-    };
-
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
-    document.addEventListener("mouseenter", onEnter);
-
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
-      document.removeEventListener("mouseenter", onEnter);
     };
   }, []);
 
   if (!enabled) return null;
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[9999]">
-      {/* Tiny dot */}
-      <div
-        ref={dotRef}
-        className="absolute left-0 top-0 -ml-[3px] -mt-[3px] h-[6px] w-[6px] rounded-full bg-ink transition-opacity duration-300"
-        style={{
-          opacity: active ? 0 : 1,
-        }}
-      />
-      {/* Expanding ring / PLAY bubble */}
-      <div
-        ref={ringRef}
-        className="absolute left-0 top-0 flex items-center justify-center rounded-full text-[11px] font-medium tracking-[0.22em] text-ink transition-[width,height,margin,background-color,border-color,color] duration-300 ease-cinematic"
-        style={{
-          width: active ? 84 : 26,
-          height: active ? 84 : 26,
-          marginLeft: active ? -42 : -13,
-          marginTop: active ? -42 : -13,
-          backgroundColor: active
-            ? "rgba(255,255,255,0.45)"
-            : "rgba(17,17,17,0)",
-          border: active
-            ? "1px solid rgba(255,255,255,0.7)"
-            : "1px solid rgba(17,17,17,0.25)",
-          backdropFilter: active ? "blur(6px)" : "blur(0px)",
-          WebkitBackdropFilter: active ? "blur(6px)" : "blur(0px)",
-          color: active ? "#111111" : "rgba(17,17,17,0)",
-        }}
-      >
-        {label}
-      </div>
-    </div>
+    <div
+      ref={ref}
+      aria-hidden
+      className="pointer-events-none fixed left-0 top-0 z-[60] h-9 w-9 rounded-full"
+      style={{
+        opacity: 0,
+        background:
+          "radial-gradient(circle, rgba(74,125,255,0.55) 0%, rgba(108,149,255,0.28) 42%, rgba(108,149,255,0) 70%)",
+        mixBlendMode: "multiply",
+        willChange: "transform, opacity",
+      }}
+    />
   );
 }

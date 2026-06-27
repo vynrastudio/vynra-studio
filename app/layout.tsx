@@ -62,7 +62,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="cursor-cinematic bg-bg text-ink antialiased">
+      <body className="bg-bg text-ink antialiased">
         <SmoothScroll />
         <Cursor />
         {children}

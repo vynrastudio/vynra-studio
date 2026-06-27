@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { site } from "@/lib/site";
 import CloudOverlay from "./CloudOverlay";
+import Magnetic from "./Magnetic";
 
 function scrollTo(target: string) {
   window.dispatchEvent(
@@ -24,7 +25,7 @@ export default function Hero() {
       animate={{ opacity: 1, filter: "blur(0px)" }}
       transition={{ duration: 1.5, ease }}
     >
-      <CloudOverlay blue />
+      <CloudOverlay blue mouseParallax />
       {/* faint vertical depth gradient — seats the section into the page */}
       <div
         aria-hidden
@@ -73,23 +74,25 @@ export default function Hero() {
           transition={{ duration: 1, delay: 1.05, ease }}
           className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
-          <button
-            onClick={() => scrollTo("#work")}
-            data-cursor="link"
-            className="group w-full rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-white transition-transform duration-300 ease-cinematic hover:-translate-y-0.5 sm:w-auto"
-          >
-            View Work
-            <span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
-              →
-            </span>
-          </button>
-          <button
-            onClick={() => scrollTo("#book")}
-            data-cursor="link"
-            className="w-full rounded-full border border-ink bg-transparent px-7 py-3.5 text-[15px] font-medium text-ink transition-colors duration-300 hover:bg-ink hover:text-white sm:w-auto"
-          >
-            Book a Call
-          </button>
+          <Magnetic className="w-full sm:w-auto">
+            <button
+              onClick={() => scrollTo("#work")}
+              className="group w-full rounded-full bg-ink px-7 py-3.5 text-[15px] font-medium text-white transition-colors duration-300 ease-cinematic hover:bg-[#000] sm:w-auto"
+            >
+              View Work
+              <span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-0.5">
+                →
+              </span>
+            </button>
+          </Magnetic>
+          <Magnetic className="w-full sm:w-auto">
+            <button
+              onClick={() => scrollTo("#book")}
+              className="w-full rounded-full border border-ink bg-transparent px-7 py-3.5 text-[15px] font-medium text-ink transition-colors duration-300 hover:bg-ink hover:text-white sm:w-auto"
+            >
+              Book a Call
+            </button>
+          </Magnetic>
         </motion.div>
       </div>
 

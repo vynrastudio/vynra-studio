@@ -88,8 +88,7 @@ export default function Navbar({ logo }: { logo: string | null }) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => handle("#book")}
-              data-cursor="link"
-              className="hidden rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition-transform duration-300 ease-cinematic hover:-translate-y-0.5 sm:block"
+              className="hidden rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition-all duration-300 ease-cinematic hover:-translate-y-0.5 hover:bg-black sm:block"
             >
               Book a Call
             </button>

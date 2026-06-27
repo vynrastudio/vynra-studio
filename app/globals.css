@@ -35,12 +35,13 @@ html.lenis body {
   overflow: hidden;
 }
 
-/* Custom cursor: hide system cursor on fine-pointer devices */
-@media (hover: hover) and (pointer: fine) {
-  .cursor-cinematic,
-  .cursor-cinematic * {
-    cursor: none !important;
-  }
+/* Keep the system cursor fully visible; just add pointer affordance on
+   interactive elements so everything reads as clickable. */
+a,
+button,
+[role="button"],
+[data-cursor] {
+  cursor: pointer;
 }
 
 ::selection {

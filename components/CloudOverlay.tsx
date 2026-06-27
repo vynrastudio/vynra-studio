@@ -1,7 +1,14 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef } from "react";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 
 /**
  * Cinematic volumetric fog.
@@ -75,10 +82,13 @@ function banks(blue: boolean): FogBank[] {
 export default function CloudOverlay({
   className = "",
   blue = false,
+  mouseParallax = false,
 }: {
   className?: string;
   /** Fold a stronger brand-blue depth into the floor fog. */
   blue?: boolean;
+  /** Add a gentle pointer-driven parallax drift (use in the hero). */
+  mouseParallax?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -86,6 +96,21 @@ export default function CloudOverlay({
     target: ref,
     offset: ["start end", "end start"],
   });
+
+  // Pointer parallax — a soft, springy drift of the whole fog field.
+  const mvx = useMotionValue(0);
+  const mvy = useMotionValue(0);
+  const smx = useSpring(mvx, { stiffness: 45, damping: 18, mass: 0.7 });
+  const smy = useSpring(mvy, { stiffness: 45, damping: 18, mass: 0.7 });
+  useEffect(() => {
+    if (!mouseParallax || reduce) return;
+    const onMove = (e: MouseEvent) => {
+      mvx.set((e.clientX / window.innerWidth - 0.5) * 28);
+      mvy.set((e.clientY / window.innerHeight - 0.5) * 20);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [mouseParallax, reduce, mvx, mvy]);
 
   // One parallax transform per bank (hooks must be unconditional & fixed count).
   const list = banks(blue);
@@ -102,6 +127,10 @@ export default function CloudOverlay({
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}
     >
+      <motion.div
+        className="absolute inset-0"
+        style={mouseParallax && !reduce ? { x: smx, y: smy } : undefined}
+      >
       {list.map((b, i) => (
         <motion.div
           key={i}
@@ -142,6 +171,7 @@ export default function CloudOverlay({
               "radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0.9), rgba(0,0,0,0) 75%)",
           }}
         />
+      </motion.div>
       </motion.div>
     </div>
   );
