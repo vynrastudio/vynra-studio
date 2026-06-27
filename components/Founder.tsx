@@ -41,8 +41,7 @@ export default function Founder({ photo }: { photo: string | null }) {
                     fill
                     quality={95}
                     sizes="(max-width: 480px) 88vw, 384px"
-                    className="object-cover"
-                    style={{ objectPosition: "50% 26%", transform: "scale(1.08)" }}
+                    className="object-cover object-center"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#eef0f5] to-[#dfe4ee]">
