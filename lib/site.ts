@@ -1,0 +1,89 @@
+export const site = {
+  name: "Vynra Studio",
+  shortName: "Vynra",
+  domain: "vynrastudio.com",
+  url: "https://vynrastudio.com",
+  headline: "Stories people stop scrolling for.",
+  subheadline:
+    "Premium editing, cinematic storytelling, and content systems for creators and businesses that want to stand out.",
+  founder: {
+    name: "Pawan Kumar",
+    title: "Founder & Creative Director",
+    bio: "Hi, I'm Pawan, founder of Vynra Studio. I started editing videos during my first year of college and quickly became obsessed with turning ordinary footage into stories people actually want to watch. Over the last 3+ years, I've worked with creators, brands, and businesses across different niches, helping them transform raw footage into content that feels cinematic, keeps attention, and tells a story. What started as freelance editing slowly evolved into Vynra Studio — a creative studio built around one simple idea: great content shouldn't just look good, it should make people stop scrolling.",
+    stats: [
+      { value: "3+", label: "Years Experience" },
+      { value: "100+", label: "Videos Delivered" },
+      { value: "Creator & Business", label: "Focused" },
+      { value: "Worldwide", label: "Working remotely" },
+    ],
+  },
+  contact: {
+    email: "vynrastudios@gmail.com",
+    phone: "+91 90457 44765",
+    phoneHref: "+919045744765",
+    calendly: "https://calendly.com/vynrastudios/30min",
+  },
+  social: [
+    { label: "Instagram", href: "#" },
+    { label: "YouTube", href: "#" },
+    { label: "LinkedIn", href: "#" },
+    { label: "X / Twitter", href: "#" },
+  ],
+  services: [
+    {
+      title: "YouTube Video Editing",
+      desc: "Long-form edits engineered for retention — pacing, story beats, and clean sound design that keep viewers watching to the end.",
+    },
+    {
+      title: "Short Form Content",
+      desc: "Scroll-stopping Reels, Shorts, and TikToks cut for the first three seconds and built to be shared.",
+    },
+    {
+      title: "Motion Graphics",
+      desc: "Tasteful animated titles, lower-thirds, and callouts that elevate the frame without ever stealing the scene.",
+    },
+    {
+      title: "Podcast Editing",
+      desc: "Multi-cam podcast edits with clean audio, dynamic framing, and clip-ready highlight moments.",
+    },
+    {
+      title: "Content Repurposing",
+      desc: "One shoot, a full content system — long-form turned into a library of shorts, carousels, and clips.",
+    },
+  ],
+  process: [
+    {
+      step: "01",
+      title: "Share your footage",
+      desc: "Drop your raw files in a shared folder. A quick brief on the goal, the vibe, and the references you love.",
+    },
+    {
+      step: "02",
+      title: "Editing & production",
+      desc: "We craft the story — pacing, sound, color, and motion — into a first cut built around your audience.",
+    },
+    {
+      step: "03",
+      title: "Feedback & revisions",
+      desc: "You review with frame-accurate notes. We refine until every beat feels exactly right.",
+    },
+    {
+      step: "04",
+      title: "Final delivery",
+      desc: "Export-ready files in every format you need, delivered on time and ready to publish.",
+    },
+  ],
+};
+
+export type Category =
+  | "Business Branding"
+  | "Creator Branding"
+  | "Tech & Educational Content"
+  | "Thought Leadership";
+
+export const CATEGORIES: Category[] = [
+  "Business Branding",
+  "Creator Branding",
+  "Tech & Educational Content",
+  "Thought Leadership",
+];

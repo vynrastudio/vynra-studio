@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: auto; /* Lenis manages smooth scroll */
+}
+
+body {
+  background-color: #f7f7f5;
+  color: #111111;
+  font-feature-settings: "ss01", "cv01", "cv11";
+  overflow-x: hidden;
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Custom cursor: hide system cursor on fine-pointer devices */
+@media (hover: hover) and (pointer: fine) {
+  .cursor-cinematic,
+  .cursor-cinematic * {
+    cursor: none !important;
+  }
+}
+
+::selection {
+  background: rgba(74, 125, 255, 0.16);
+  color: #111111;
+}
+
+/* Thin, premium scrollbar */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2e2de;
+  border-radius: 999px;
+  border: 2px solid #f7f7f5;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d2d2cd;
+}
+
+/* Hide native scrollbars inside the filmstrip */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Film grain overlay used on hovered portfolio thumbnails */
+.film-grain::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+.film-grain.is-active::after {
+  opacity: 0.5;
+  animation: grain 0.6s steps(2) infinite;
+}
+
+/* ---- Cinematic volumetric fog ------------------------------------- */
+/* Very slow horizontal drift + a touch of scale breathing per layer.
+   Parallax (vertical) is handled separately by Framer on an outer wrapper,
+   so these only ever drive translateX/scale to avoid transform conflicts. */
+@keyframes fog-drift-a {
+  0%   { transform: translate3d(-7%, 0, 0) scale(1.1); }
+  100% { transform: translate3d(7%, 0, 0) scale(1.18); }
+}
+@keyframes fog-drift-b {
+  0%   { transform: translate3d(8%, 0, 0) scale(1.12); }
+  100% { transform: translate3d(-8%, 0, 0) scale(1.2); }
+}
+@keyframes fog-drift-c {
+  0%   { transform: translate3d(-5%, 0, 0) scale(1.06); }
+  100% { transform: translate3d(6%, 0, 0) scale(1.14); }
+}
+
+.fog-layer {
+  position: absolute;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cloud-drift,
+  .animate-cloud-drift-slow,
+  .fog-layer,
+  .film-grain.is-active::after {
+    animation: none !important;
+  }
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ---- Premium surface system ---------------------------------------- */
+
+@layer utilities {
+  /* Glassmorphism — translucent panel with a soft top highlight */
+  .glass {
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.72),
+      rgba(255, 255, 255, 0.5)
+    );
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 12px 40px -12px rgba(17, 17, 17, 0.1);
+  }
+
+  .glass-line {
+    border: 1px solid rgba(17, 17, 17, 0.06);
+  }
+
+  /* Layered soft shadow for floating cards */
+  .shadow-soft {
+    box-shadow:
+      0 1px 2px rgba(17, 17, 17, 0.04),
+      0 12px 28px -10px rgba(17, 17, 17, 0.1);
+  }
+  .shadow-float {
+    box-shadow:
+      0 2px 6px rgba(17, 17, 17, 0.04),
+      0 30px 60px -22px rgba(17, 17, 17, 0.22);
+  }
+  /* Cinematic lift with a whisper of brand blue */
+  .shadow-cinematic {
+    box-shadow:
+      0 2px 8px rgba(17, 17, 17, 0.06),
+      0 40px 80px -28px rgba(28, 50, 110, 0.3),
+      0 0 0 1px rgba(74, 125, 255, 0.12);
+  }
+}
+
+/* Sitewide cinematic film grain — ultra subtle, sits above content */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
