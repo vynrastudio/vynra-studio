@@ -19,8 +19,6 @@ export const site = {
   },
   contact: {
     email: "vynrastudios@gmail.com",
-    phone: "+91 90457 44765",
-    phoneHref: "+919045744765",
     calendly: "https://calendly.com/vynrastudios/30min",
   },
   social: [

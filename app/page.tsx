@@ -27,7 +27,6 @@ export default function Home() {
     name: site.name,
     url: site.url,
     email: site.contact.email,
-    telephone: site.contact.phone,
     founder: { "@type": "Person", name: site.founder.name },
     description: site.subheadline,
   };

@@ -52,15 +52,6 @@ export default function Footer({ logo }: { logo: LogoAsset | null }) {
               </li>
               <li>
                 <a
-                  href={`tel:${site.contact.phoneHref}`}
-                  data-cursor="link"
-                  className="text-ink transition-colors hover:text-accent"
-                >
-                  {site.contact.phone}
-                </a>
-              </li>
-              <li>
-                <a
                   href={site.contact.calendly}
                   target="_blank"
                   rel="noopener noreferrer"
