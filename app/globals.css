@@ -127,6 +127,17 @@ button,
   text-wrap: balance;
 }
 
+/* Draggable reel carousel — grab / grabbing cursors across the whole strip */
+.reel-track {
+  cursor: grab;
+}
+.reel-track.is-dragging {
+  cursor: grabbing;
+}
+.reel-track * {
+  cursor: inherit;
+}
+
 /* ---- Premium surface system ---------------------------------------- */
 
 @layer utilities {

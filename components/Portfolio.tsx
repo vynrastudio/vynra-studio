@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { PortfolioItem } from "@/lib/assets";
 import { CATEGORIES } from "@/lib/site";
 import VideoCard from "./VideoCard";
@@ -13,59 +11,146 @@ type Filter = "All" | (typeof CATEGORIES)[number];
 export default function Portfolio({ items }: { items: PortfolioItem[] }) {
   const [active, setActive] = useState<Filter>("All");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
 
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   const filtered = useMemo(
     () =>
-      active === "All"
-        ? items
-        : items.filter((i) => i.category === active),
+      active === "All" ? items : items.filter((i) => i.category === active),
     [items, active]
   );
 
   const filters: Filter[] = ["All", ...CATEGORIES];
 
-  // GSAP horizontal "filmstrip" — desktop + motion only. Rebuilds on filter
-  // change so the pin distance always matches the visible track width.
+  // Reset the carousel to the start whenever the filter changes.
   useEffect(() => {
-    const mql = window.matchMedia(
-      "(min-width: 1024px) and (prefers-reduced-motion: no-preference)"
-    );
-    if (!mql.matches) return;
+    if (trackRef.current) trackRef.current.scrollLeft = 0;
+  }, [active]);
 
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      const track = trackRef.current;
-      const pin = pinRef.current;
-      if (!track || !pin) return;
+  /**
+   * Carousel interactions on the horizontal strip:
+   * - mouse wheel → smooth horizontal scroll (releases at the ends so the page
+   *   can keep scrolling); Lenis is told to ignore the wheel here.
+   * - click-and-drag → horizontal scroll, with grab / grabbing cursors.
+   * - touch swipe → native (untouched).
+   */
+  useEffect(() => {
+    const el = trackRef.current;
+    if (!el) return;
 
-      const getDistance = () =>
-        Math.max(0, track.scrollWidth - pin.clientWidth);
+    const clamp = (v: number, min: number, max: number) =>
+      Math.max(min, Math.min(max, v));
 
-      gsap.to(track, {
-        x: () => -getDistance(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: pin,
-          start: "top top+=88",
-          end: () => `+=${getDistance()}`,
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true,
-          anticipatePin: 1,
-        },
-      });
-    }, sectionRef);
+    let target = el.scrollLeft;
+    let raf = 0;
+    let lerping = false;
 
-    const refresh = () => ScrollTrigger.refresh();
-    const t = setTimeout(refresh, 60);
+    const tick = () => {
+      const max = el.scrollWidth - el.clientWidth;
+      target = clamp(target, 0, max);
+      const diff = target - el.scrollLeft;
+      if (Math.abs(diff) < 0.5) {
+        el.scrollLeft = target;
+        lerping = false;
+        return;
+      }
+      const prev = el.scrollLeft;
+      el.scrollLeft = prev + diff * 0.2; // smooth glide
+      if (Math.abs(el.scrollLeft - prev) < 0.1) {
+        lerping = false; // reached the real scroll limit
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    const startLerp = () => {
+      if (!lerping) {
+        lerping = true;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+
+    // ---- wheel → horizontal ----
+    const onWheel = (e: WheelEvent) => {
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 1) return;
+      const delta =
+        Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (delta === 0) return;
+      // Release at the ends (with a tolerance for sub-pixel rounding) so the
+      // page keeps scrolling once the strip can't move further that way.
+      const pos = el.scrollLeft;
+      const EDGE = 2;
+      if ((delta > 0 && pos >= max - EDGE) || (delta < 0 && pos <= EDGE)) return;
+      e.preventDefault();
+      if (!lerping) target = pos; // sync before accumulating
+      target = clamp(target + delta, 0, max);
+      startLerp();
+    };
+
+    // ---- click + drag → horizontal ----
+    let down = false;
+    let moved = false;
+    let startX = 0;
+    let startLeft = 0;
+    let pid = -1;
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch" || e.button !== 0) return; // touch is native
+      down = true;
+      moved = false;
+      pid = e.pointerId;
+      startX = e.clientX;
+      startLeft = el.scrollLeft;
+      target = el.scrollLeft;
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      if (!moved && Math.abs(dx) > 4) {
+        moved = true;
+        setDragging(true);
+        try {
+          el.setPointerCapture(pid);
+        } catch {}
+      }
+      if (moved) {
+        el.scrollLeft = startLeft - dx;
+        target = el.scrollLeft;
+      }
+    };
+    const endDrag = () => {
+      if (!down) return;
+      down = false;
+      setDragging(false);
+      try {
+        el.releasePointerCapture(pid);
+      } catch {}
+    };
+    // a drag must not also trigger a card click (which plays the video)
+    const onClickCapture = (e: MouseEvent) => {
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        moved = false;
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: false });
+    el.addEventListener("pointerdown", onPointerDown);
+    el.addEventListener("pointermove", onPointerMove);
+    el.addEventListener("pointerup", endDrag);
+    el.addEventListener("pointercancel", endDrag);
+    el.addEventListener("click", onClickCapture, true);
 
     return () => {
-      clearTimeout(t);
-      ctx.revert();
+      cancelAnimationFrame(raf);
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("pointerdown", onPointerDown);
+      el.removeEventListener("pointermove", onPointerMove);
+      el.removeEventListener("pointerup", endDrag);
+      el.removeEventListener("pointercancel", endDrag);
+      el.removeEventListener("click", onClickCapture, true);
     };
   }, [active, filtered.length]);
 
@@ -73,20 +158,10 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
     if (f === active) return;
     setActive(f);
     setHoveredId(null);
-    // Reset to a clean position so the rebuilt pin starts fresh.
-    window.dispatchEvent(
-      new CustomEvent("lenis:scrollTo", {
-        detail: { target: "#work", offset: -88 },
-      })
-    );
   };
 
   return (
-    <section
-      id="work"
-      ref={sectionRef}
-      className="relative scroll-mt-24 bg-bg py-24 sm:py-32"
-    >
+    <section id="work" className="relative scroll-mt-24 bg-bg py-24 sm:py-32">
       <div className="mx-auto max-w-container px-5 sm:px-8">
         <Reveal>
           <div
@@ -103,7 +178,7 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
               </h2>
               <p className="mt-4 text-[1.05rem] leading-relaxed text-muted">
                 A selection of edits across branding, creators, education, and
-                thought leadership. Hover to preview — click to open the reel.
+                thought leadership. Hover to preview — click to play.
               </p>
             </div>
           </div>
@@ -133,38 +208,38 @@ export default function Portfolio({ items }: { items: PortfolioItem[] }) {
         </Reveal>
       </div>
 
-      {/* Pinned horizontal filmstrip (desktop). On smaller screens this is a
-          natural horizontal scroll; the GSAP effect simply doesn't attach. */}
-      <div ref={pinRef} className="relative mt-12 overflow-hidden">
-        <div
-          ref={trackRef}
-          className="no-scrollbar flex gap-5 overflow-x-auto px-5 pb-2 sm:px-8 lg:overflow-visible lg:px-[max(2rem,calc((100vw-1280px)/2+2rem))]"
-        >
-          {filtered.map((item, i) => (
-            <div
-              key={item.id}
-              className="w-[72vw] shrink-0 sm:w-[42vw] md:w-[300px] lg:w-[320px]"
-            >
-              <VideoCard
-                item={item}
-                index={i}
-                hovered={hoveredId === item.id}
-                dimmed={hoveredId !== null && hoveredId !== item.id}
-                onHover={setHoveredId}
-              />
-            </div>
-          ))}
+      {/* Horizontal reel carousel — wheel / drag / swipe, scrollbar hidden */}
+      <div
+        ref={trackRef}
+        data-lenis-prevent-wheel
+        className={`reel-track no-scrollbar mt-12 flex select-none gap-5 overflow-x-auto px-5 pb-2 sm:px-8 lg:px-[max(2rem,calc((100vw-1280px)/2+2rem))] ${
+          dragging ? "is-dragging" : ""
+        }`}
+      >
+        {filtered.map((item, i) => (
+          <div
+            key={item.id}
+            className="w-[72vw] shrink-0 sm:w-[42vw] md:w-[300px] lg:w-[320px]"
+          >
+            <VideoCard
+              item={item}
+              index={i}
+              hovered={hoveredId === item.id}
+              dimmed={hoveredId !== null && hoveredId !== item.id}
+              onHover={setHoveredId}
+            />
+          </div>
+        ))}
 
-          {/* trailing spacer so the last card can clear the viewport edge */}
-          <div aria-hidden className="w-px shrink-0 lg:w-[20vw]" />
-        </div>
-
-        {filtered.length === 0 && (
-          <p className="px-8 py-16 text-center text-muted">
-            No reels in this category yet.
-          </p>
-        )}
+        {/* trailing spacer so the last card can clear the viewport edge */}
+        <div aria-hidden className="w-px shrink-0 lg:w-[20vw]" />
       </div>
+
+      {filtered.length === 0 && (
+        <p className="px-8 py-16 text-center text-muted">
+          No reels in this category yet.
+        </p>
+      )}
     </section>
   );
 }
