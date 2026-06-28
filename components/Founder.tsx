@@ -113,7 +113,7 @@ export default function Founder({ photo }: { photo: string | null }) {
           </Reveal>
 
           <Reveal delay={0.14}>
-            <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <dl className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {founder.stats.map((s) => (
                 <div
                   key={s.label}
