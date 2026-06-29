@@ -9,11 +9,11 @@ export const site = {
   founder: {
     name: "Pawan Kumar",
     title: "Founder & Creative Director",
-    bio: "Hi, I'm Pawan, founder of Vynra Studio. I started editing videos during my first year of college and quickly became obsessed with turning ordinary footage into stories people actually want to watch. Over the last 3+ years, I've worked with creators, brands, and businesses across different niches, helping them transform raw footage into content that feels cinematic, keeps attention, and tells a story. What started as freelance editing slowly evolved into Vynra Studio — a creative studio built around one simple idea: great content shouldn't just look good, it should make people stop scrolling.",
+    bio: "Hi, I'm Pawan, founder of Vynra Studio. I started editing videos during my first year of college and quickly became obsessed with turning ordinary footage into stories people actually want to watch. Over the last 3+ years, I've worked with creators, brands, and businesses across multiple niches — including content associated with audiences exceeding 11 million followers — helping them transform raw footage into work that feels cinematic, keeps attention, and tells a story. What started as freelance editing slowly evolved into Vynra Studio — a creative studio built around one simple idea: great content shouldn't just look good, it should make people stop scrolling.",
     stats: [
+      { value: "1M+", label: "Views Generated" },
+      { value: "11M+", label: "Largest Creator Audience" },
       { value: "3+", label: "Years Experience" },
-      { value: "200K+", label: "Audience Reach Across Clients" },
-      { value: "Creator & Brand", label: "Storytelling" },
     ],
   },
   contact: {
