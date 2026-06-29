@@ -2,103 +2,107 @@
 
 import { site } from "@/lib/site";
 import Reveal from "./Reveal";
-import Magnetic from "./Magnetic";
 
 export default function Services() {
+  const { traditional, vynra } = site.comparison;
+  const rows = traditional.map((t, i) => ({ old: t, ours: vynra[i] }));
+
   return (
     <section
       id="services"
-      className="relative scroll-mt-24 overflow-hidden bg-bg py-24 sm:py-32"
+      className="relative scroll-mt-24 overflow-hidden bg-bg py-28 sm:py-36"
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute right-[-10%] top-[10%] h-[50vh] w-[50vh] rounded-full blur-[120px]"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(74,125,255,0.07), rgba(255,255,255,0) 70%)",
-        }}
-      />
       <div className="relative mx-auto max-w-container px-5 sm:px-8">
+        {/* Header */}
         <Reveal>
-          <div className="max-w-2xl">
+          <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.24em] text-accent">
               <span className="h-px w-6 bg-accent/40" />
-              What we do
+              The difference
             </span>
-            <h2 className="mt-3 text-balance text-[clamp(2rem,4.5vw,3.4rem)] font-semibold leading-[1.02] tracking-tightest text-ink">
-              Editing, end to end.
+            <h2 className="mt-5 text-balance text-[clamp(2.4rem,5.5vw,4.4rem)] font-semibold leading-[0.96] tracking-tightest text-ink">
+              We build systems, not just edits.
             </h2>
-            <p className="mt-4 text-[1.05rem] leading-relaxed text-muted">
-              A full content system — from a single hero edit to a library of
-              shorts built to keep your audience watching.
+            <p className="mt-6 max-w-xl text-[1.12rem] leading-relaxed text-muted">
+              Most editing stops at the export. We design the whole engine —
+              story, retention, and distribution — so your content compounds
+              instead of disappearing.
             </p>
           </div>
         </Reveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {site.services.map((s, i) => (
-            <Reveal key={s.title} delay={i * 0.05}>
-              <article
-                data-cursor="link"
-                className="group relative h-full overflow-hidden rounded-2xl border border-line bg-surface p-7 shadow-soft transition-all duration-500 ease-cinematic hover:-translate-y-1.5 hover:border-accent/20 hover:shadow-cinematic"
-              >
-                <div
-                  aria-hidden
-                  className="absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-gradient-to-r from-accent to-accent-2 transition-transform duration-500 ease-cinematic group-hover:scale-x-100"
-                />
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-semibold tabular-nums text-accent">
-                    0{i + 1}
-                  </span>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-muted transition-colors duration-300 group-hover:border-ink group-hover:bg-ink group-hover:text-white">
-                    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                      <path
-                        d="M1 12L12 1M12 1H3.5M12 1v8.5"
+        {/* Comparison */}
+        <Reveal delay={0.08}>
+          <div className="mt-16 sm:mt-20">
+            {/* Column headers */}
+            <div className="grid grid-cols-2 border-b border-line">
+              <div className="pb-5 pr-5 sm:pr-10">
+                <span className="text-[12px] font-medium uppercase tracking-[0.2em] text-muted/70">
+                  Traditional editing
+                </span>
+              </div>
+              <div className="border-l border-line pb-5 pl-5 sm:pl-10">
+                <span className="text-[12px] font-semibold uppercase tracking-[0.2em] text-ink">
+                  Vynra Studio
+                </span>
+              </div>
+            </div>
+
+            {/* Rows */}
+            <dl>
+              {rows.map((row) => (
+                <div key={row.ours} className="grid grid-cols-2 border-b border-line">
+                  {/* Traditional — de-emphasised */}
+                  <dt className="flex items-center gap-3 py-7 pr-5 sm:gap-4 sm:py-9 sm:pr-10">
+                    <svg
+                      aria-hidden
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      className="shrink-0 text-muted/40"
+                    >
+                      <line
+                        x1="3.5"
+                        y1="8"
+                        x2="12.5"
+                        y2="8"
                         stroke="currentColor"
-                        strokeWidth="1.4"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    <span className="text-[clamp(1.05rem,2.1vw,1.45rem)] font-normal leading-snug text-muted">
+                      {row.old}
+                    </span>
+                  </dt>
+
+                  {/* Vynra — emphasised */}
+                  <dd className="flex items-center gap-3 border-l border-line py-7 pl-5 sm:gap-4 sm:py-9 sm:pl-10">
+                    <svg
+                      aria-hidden
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      className="shrink-0 text-ink"
+                    >
+                      <path
+                        d="M3.5 8.5 6.5 11.5 12.5 4.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       />
                     </svg>
-                  </span>
+                    <span className="text-balance text-[clamp(1.05rem,2.1vw,1.45rem)] font-medium leading-snug tracking-tight text-ink">
+                      {row.ours}
+                    </span>
+                  </dd>
                 </div>
-                <h3 className="mt-8 text-[1.2rem] font-semibold tracking-tight text-ink">
-                  {s.title}
-                </h3>
-                <p className="mt-2.5 text-[0.95rem] leading-relaxed text-muted">
-                  {s.desc}
-                </p>
-              </article>
-            </Reveal>
-          ))}
-
-          {/* CTA tile */}
-          <Reveal delay={site.services.length * 0.05}>
-            <article className="flex h-full flex-col justify-between rounded-2xl bg-ink p-7 text-white">
-              <h3 className="text-[1.2rem] font-semibold tracking-tight">
-                Not sure what you need?
-              </h3>
-              <p className="mt-2.5 text-[0.95rem] leading-relaxed text-white/65">
-                Tell us the goal — we&apos;ll shape the right content system
-                around it.
-              </p>
-              <Magnetic className="mt-8 w-fit">
-                <button
-                  onClick={() =>
-                    window.dispatchEvent(
-                      new CustomEvent("lenis:scrollTo", {
-                        detail: { target: "#book", offset: -80 },
-                      })
-                    )
-                  }
-                  className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[14px] font-medium text-ink transition-colors duration-300 hover:bg-white/90"
-                >
-                  Book a call →
-                </button>
-              </Magnetic>
-            </article>
-          </Reveal>
-        </div>
+              ))}
+            </dl>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

@@ -29,25 +29,48 @@ export const site = {
   services: [
     {
       title: "YouTube Video Editing",
+      tag: "Retention Editing",
       desc: "Long-form edits engineered for retention — pacing, story beats, and clean sound design that keep viewers watching to the end.",
     },
     {
       title: "Short Form Content",
+      tag: "Shorts Systems",
       desc: "Scroll-stopping Reels, Shorts, and TikToks cut for the first three seconds and built to be shared.",
     },
     {
       title: "Motion Graphics",
+      tag: "Motion Graphics",
       desc: "Tasteful animated titles, lower-thirds, and callouts that elevate the frame without ever stealing the scene.",
     },
     {
       title: "Podcast Editing",
+      tag: "Podcast Production",
       desc: "Multi-cam podcast edits with clean audio, dynamic framing, and clip-ready highlight moments.",
     },
     {
       title: "Content Repurposing",
+      tag: "Repurposing",
       desc: "One shoot, a full content system — long-form turned into a library of shorts, carousels, and clips.",
     },
   ],
+  comparison: {
+    traditional: [
+      "One video delivered",
+      "Editing only",
+      "Generic style",
+      "No repurposing",
+      "Platform-specific",
+      "Reactive workflow",
+    ],
+    vynra: [
+      "Content systems",
+      "Retention-focused storytelling",
+      "Creator-specific editing language",
+      "Multi-platform distribution",
+      "Repurposing pipeline",
+      "Strategic content growth",
+    ],
+  },
   process: [
     {
       step: "01",
