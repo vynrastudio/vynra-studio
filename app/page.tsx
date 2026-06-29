@@ -26,6 +26,8 @@ export default function Home() {
     "@type": "Organization",
     name: site.name,
     url: site.url,
+    logo: `${site.url}/icon-512.png`,
+    image: `${site.url}/og-image.png`,
     email: site.contact.email,
     founder: { "@type": "Person", name: site.founder.name },
     description: site.subheadline,
