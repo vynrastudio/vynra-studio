@@ -22,9 +22,7 @@ export const site = {
   },
   social: [
     { label: "Instagram", href: "#" },
-    { label: "YouTube", href: "#" },
     { label: "LinkedIn", href: "#" },
-    { label: "X / Twitter", href: "#" },
   ],
   services: [
     {
